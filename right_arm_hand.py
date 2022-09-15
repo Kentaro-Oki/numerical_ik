@@ -1,6 +1,14 @@
+#########################################
+# Program to evaluate IK (Inverse Kinematics)
+# This program needs completed FK (Forward Kinematics)
+#########################################
+
 import numpy as np
 from scipy.spatial.transform import Rotation as R
 import  time
+
+POS_EPSILON = 1e-4
+ROT_EPSILON = 1e-6
 
 ARM_LINK_LEN = np.array([0.315, 0., 0.33, 0.02, 0.428, 0.0045, 0.03])
 THUMB_LINK_LEN = np.array([78e-3, 15e-3, 6.7e-3, 36e-3, 4.5e-3, 27.5e-3, 40e-3, 20e-3, 20e-3])
@@ -78,8 +86,8 @@ def jacob_mat(theta, output_len):
 
 # Inverse kinematics
 def ik(tgt_pose, output_len):
-    _pos_epsilon = 1e-4
-    _rot_epsilon = 1e-6
+    POS_EPSILON = 1e-4
+    ROT_EPSILON = 1e-6
     _theta_init = np.zeros(17)
     _W_E_mat = np.diag(np.ones(output_len))
     _ARM_LEN = np.sum(ARM_LINK_LEN)
@@ -99,21 +107,29 @@ def ik(tgt_pose, output_len):
         _g_vec = np.transpose(_J_mat) @ _W_E_mat @ _e_vec
         theta += (np.linalg.inv(_H_mat) @ _g_vec)[:,0]
         _error = _e_vec[:,0]
-        if (np.linalg.norm(_error[:3]) < _pos_epsilon) and (np.linalg.norm(_error[3:6]) < _pos_epsilon) \
-                and (np.linalg.norm(_error[6:]) < _pos_epsilon):
+        if (np.linalg.norm(_error[:3]) < POS_EPSILON) and (np.linalg.norm(_error[3:6]) < POS_EPSILON) \
+                and (np.linalg.norm(_error[6:]) < POS_EPSILON):
             break
     return theta
 
 if __name__ == '__main__':
     output_len = 9
-    theta_act = np.pi/6*np.ones(17)
-    tgt_pose = fk(theta_act)[:output_len]
-    start_time = time.perf_counter()
-    theta_est = ik(tgt_pose, output_len)
-    end_time = time.perf_counter()
-    ik_pose = fk(theta_est)[:output_len]
-    print('Actual theta:', theta_act)
-    print('Estimated theta:', theta_est)
-    print('Target pose:', tgt_pose)
-    print('IK pose:', ik_pose)
-    print('Performance time [ms]:', (end_time - start_time)*1e3)
+    for j in range(100):
+        theta_act = np.random.uniform(low=-np.pi, high=np.pi, size=17)
+        tgt_pose = fk(theta_act)[:output_len]
+        start_time = time.perf_counter()
+        theta_est = ik(tgt_pose, output_len)
+        end_time = time.perf_counter()
+        ik_pose = fk(theta_est)[:output_len]
+        result = ['OK', 0.]
+        for i in range(3):
+            pose_error = np.linalg.norm(tgt_pose[3*i:3*(i+1)] - ik_pose[3*i:3*(i+1)])
+            if pose_error >= POS_EPSILON:
+                result[0] = 'NG'
+            if pose_error > result[1]:
+                result[1] = pose_error
+        print('=========================================')
+        print('Test No.', j+1)
+        print('Result:', result[0])
+        print('Max error [mm]:', result[1]*1e3)
+        print('Performance time [ms]:', (end_time - start_time)*1e3)
