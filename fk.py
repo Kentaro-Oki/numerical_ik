@@ -77,8 +77,20 @@ class FK:
         self.pv, self._rm = self.fk_arm_right_pvrm(theta)
         return self.pv, self.rm2rv(self._rm)
 
-    # FK of world to right finger tips with output as position vector and rotation vector
-    def fk_fingers_right_pv(self, theta):
+    # FK of world to right thumb with output as position vector and rotation matrix
+    def fk_thumb_right_pvrm(self, theta):
+        return self.tm2pvrm(self.tm_arm(theta) @ self.tm_arm_thumb_right(theta))
+
+    # FK of world to right thumb with output as position vector and rotation matrix
+    def fk_index_right_pvrm(self, theta):
+        return self.tm2pvrm(self.tm_arm(theta) @ self.tm_arm_index_right(theta))
+
+    # FK of world to right thumb with output as position vector and rotation matrix
+    def fk_middle_right_pvrm(self, theta):
+        return self.tm2pvrm(self.tm_arm(theta) @ self.tm_arm_middle_right(theta))
+
+    # FK of world to right finger tips with output as position vectors
+    def fk_fingers_right_pvs(self, theta):
         self._tm_arm = self.tm_arm(theta)
         self.pv_thumb = self.tm2pv(self._tm_arm @ self.tm_arm_thumb_right(theta))
         self.pv_index = self.tm2pv(self._tm_arm @ self.tm_arm_index_right(theta))

@@ -2,10 +2,10 @@ import numpy as np
 
 class DH_param():
     def __init__(self):
-        self.LINK_LEN_ARM_RIGHT = np.array([0.1, 0.6, 0.315, 0., 0.33, 0.02, 0.428, 0.0045, 0.03])
-        self.LINK_LEN_THUMB_RIGHT = np.array([78e-3, 15e-3, 6.7e-3, 36e-3, 4.5e-3, 27.5e-3, 40e-3, 20e-3, 20e-3])
-        self.LINK_LEN_INDEX_RIGHT = np.array([156.5e-3, 17.5e-3, 6.2e-3, 20e-3, 3e-3, 45.5e-3, 20e-3, 20e-3])
-        self.LINK_LEN_MIDDLE_RIGHT = np.array([161.5e-3, 17.5e-3, 18.3e-3, 20e-3, 3e-3, 50.5e-3, 20e-3, 20e-3])
+        self.LINK_LEN_ARM_RIGHT = np.array([0., 0.6, 0.315, 0., 0.33, 0.2, 0.482, 0.0045, 0.03])
+        self.LINK_LEN_THUMB_RIGHT = np.array([78e-3, 15e-3, 6.7e-3, 36e-3, 27.5e-3, 4.5e-3, 40e-3, 5e-3, 25e-3])
+        self.LINK_LEN_INDEX_RIGHT = np.array([156.5e-3, 17.5e-3, 6.2e-3, 20e-3, 3e-3, 45.5e-3, 5e-3, 25e-3])
+        self.LINK_LEN_MIDDLE_RIGHT = np.array([161.5e-3, 17.5e-3, 18.3e-3, 20e-3, 3e-3, 50.5e-3, 5e-3, 25e-3])
 
     def arm(self, theta, link_param):
         return np.array([[link_param[0], 0., 0., -np.pi/2],
