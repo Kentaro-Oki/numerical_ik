@@ -21,11 +21,13 @@ class IK:
         self.fk = FK()
         self.jacob = Jacobian()
 
+    # Calc. error of position vector and rotation matrix from theta of current pose and target position vector and rotation matrix
     def error_pvrm(self, theta, tgt_pvrm, fk_pvrm):
         self.e_pv = tgt_pvrm[0] - fk_pvrm(theta)[0]
         self.e_rv = self.jacob.error_rms(fk_pvrm(theta)[1], tgt_pvrm[1])
         return np.concatenate((self.e_pv, self.e_rv))
 
+    # Simple numerical IK for a target set of position vector and rotation matrix from initial theta 
     def ik_pvrm_simple(self, init_theta, tgt_pvrm, fk_pvrm, jacob_pvrm, is_jrange_mode):
         self._W_E_mat = np.diag(np.ones(6))
         self._W_N_bar_mat = np.diag(self.DAMP_PARAM)
@@ -48,6 +50,30 @@ class IK:
             self._prev_e_vec = self._e_vec[:,0]
         return self.theta
 
+# Simple numerical IK for target position vectors from initial theta 
+    def ik_pvs_simple(self, init_theta, tgt_pvs, fk_pvs, jacob_pvs, is_jrange_mode):
+        self._W_E_mat = np.diag(np.ones(len(tgt_pvs)))
+        self._W_N_bar_mat = np.diag(self.DAMP_PARAM)
+        self.theta = init_theta
+        self._prev_e_vec = np.zeros(np.ones(len(tgt_pvs)))
+        while(True):
+            self._e_vec = self.error_pvs(self.theta, tgt_pvrm, fk_pvrm).reshape(-1,1)
+            if (np.linalg.norm(self._e_vec[:,0][:3]) < self.POS_EPSILON and np.linalg.norm(self._e_vec[:,0][3:]) < self.ROT_EPSILON) \
+                or (np.linalg.norm(self._e_vec[:,0][:3] - self._prev_e_vec[:3]) < self.POS_EPSILON and np.linalg.norm(self._e_vec[:,0][3:] - self._prev_e_vec[3:]) < self.ROT_EPSILON):
+                break
+            self._E_mat = 1/2*(self._e_vec.T @ self._W_E_mat @ self._e_vec)
+            self._W_N_mat = self._E_mat*np.identity(len(self.DAMP_PARAM)) + self._W_N_bar_mat
+            self._J_mat = jacob_pvrm(self.theta, fk_pvrm)
+            self._H_mat = self._J_mat.T @ self._W_E_mat @ self._J_mat + self._W_N_mat
+            self._g_vec = self._J_mat.T @ self._W_E_mat @ self._e_vec
+            self.theta += (np.linalg.inv(self._H_mat) @ self._g_vec)[:,0]
+            if is_jrange_mode:
+                self.theta = self.theta*(self.theta >= self.JOINT_LIMIT_MIN) + self.JOINT_LIMIT_MIN*(self.theta < self.JOINT_LIMIT_MIN)
+                self.theta = self.theta*(self.theta <= self.JOINT_LIMIT_MAX) + self.JOINT_LIMIT_MAX*(self.theta > self.JOINT_LIMIT_MAX)
+            self._prev_e_vec = self._e_vec[:,0]
+        return self.theta
+
+    # IK for single arm 
     def ik_arm_simple(self, init_theta, tgt_pvrm, is_jrange_mode=False):
         self.theta = self.ik_pvrm_simple(init_theta, tgt_pvrm, self.fk.fk_arm_right_pvrm, self.jacob.jacob_pvrm_mat, is_jrange_mode)
         return self.theta
