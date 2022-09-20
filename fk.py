@@ -60,6 +60,10 @@ class FK:
     def rv2rm(self, rv):
         return R.from_rotvec(rv).as_matrix()
 
+    # Rotation vector to unit quaternion
+    def rv2uq(self, rv):
+        return R.from_rotvec(rv).as_quat()
+
     # FK of world to right arm tip with output as position vector and rotation matrix
     def fk_arm_right_pvrm(self, theta):
         return self.tm2pvrm(self.tm_arm(theta))
@@ -71,6 +75,9 @@ class FK:
     # FK of world to right wrist with output as position vector and rotation matrix
     def fk_wrist_right_pvrm(self, theta):
         return self.tm2pvrm(self.tm_wrist(theta))
+
+    def fk_elbow_wrist_right_pvs(self, theta):
+        return np.concatenate((self.fk_elbow_right_pvrm(theta)[0], self.fk_wrist_right_pvrm(theta)[0]))
 
     # FK of world to right arm tip with output as position vector and rotation vector
     def fk_arm_right_pvrv(self, theta):
