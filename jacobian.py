@@ -32,12 +32,11 @@ class Jacobian():
     def jacob_pvs_mat(self, theta, fk_pvs):
         self._l_theta = len(theta)
         self._l_pvs = len(fk_pvs(theta))
-        self.J_mat = np.zeros((3*self._l_pvs, self._l_theta))
-        for i in range(self._l_pvs):
-            for j in range(self._l_theta):
-                self._theta_p = theta + self.EPSILON/2*np.identity(self._l_theta)[j,:]
-                self._theta_m = theta - self.EPSILON/2*np.identity(self._l_theta)[j,:]
-                self.J_mat[3*i:3*(i+1),j] = (fk_pvs(self._theta_p)[i] - fk_pvs(self._theta_m)[i])/self.EPSILON
+        self.J_mat = np.zeros((self._l_pvs, self._l_theta))
+        for i in range(self._l_theta):
+            self._theta_p = theta + self.EPSILON/2*np.identity(self._l_theta)[i,:]
+            self._theta_m = theta - self.EPSILON/2*np.identity(self._l_theta)[i,:]
+            self.J_mat[:,i] = (fk_pvs(self._theta_p) - fk_pvs(self._theta_m))/self.EPSILON
         return self.J_mat
 
     def arm(self, theta):
