@@ -9,8 +9,9 @@ if __name__ == '__main__':
     data = np.zeros((10,6))
 
     for i in range(10):
-        print(i+1)
         init_theta = (ik.JOINT_LIMIT_MIN + ik.JOINT_LIMIT_MAX)/2
+        init_pvs = fk.fk_fingers_right_pvs(init_theta)
+        sub_init_pvs = fk.fk_elbow_wrist_right_pvs(init_theta)
         # tgt_theta = init_theta + np.pi/3*np.ones(17)
 
         # tgt_pvs = fk.fk_fingers_right_pvs(tgt_theta)
@@ -18,8 +19,14 @@ if __name__ == '__main__':
         sub_tgt_pvs = np.array([0.2, -0.3, 1.0, 0.3, 0., 0.3])
 
         start_time = time.perf_counter()
-        ik_theta = ik.ik_fingers_simple(init_theta, tgt_pvs, True)
-        # ik_theta = ik.ik_fingers_prioritized(init_theta, tgt_pvs, sub_tgt_pvs, True)
+        tgt_pvs_tmp = init_pvs
+        sub_tgt_tmp = sub_init_pvs
+        ik_theta = init_theta
+        for j in range(100):
+            tgt_pvs_tmp += (tgt_pvs - init_pvs)*(j+1)/100
+            sub_tgt_tmp += (sub_tgt_pvs - sub_init_pvs)*(j+1)/100
+            # ik_theta = ik.ik_fingers_simple(ik_theta, tgt_pvs_tmp, True)
+            ik_theta = ik.ik_fingers_prioritized(ik_theta, tgt_pvs_tmp, sub_tgt_tmp, True)
         end_time = time.perf_counter()
         ik_pvs = fk.fk_fingers_right_pvs(ik_theta)
         sub_ik_pvs = fk.fk_elbow_wrist_right_pvs(ik_theta)
@@ -34,6 +41,7 @@ if __name__ == '__main__':
         data[i,3] = np.linalg.norm(sub_tgt_pvs[:3] - sub_ik_pvs[:3])*1e3
         data[i,4] = np.linalg.norm(sub_tgt_pvs[3:6] - sub_ik_pvs[3:6])*1e3
         data[i,5] = (end_time - start_time)*1e3
+        print(i+1, end_time - start_time)
     print('Error of thumb [mm]:', np.average(data[:,0]))
     print('Error of index [mm]:', np.average(data[:,1]))
     print('Error of middle [mm]:', np.average(data[:,2]))
