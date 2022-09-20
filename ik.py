@@ -83,7 +83,7 @@ class IK:
                 if ((np.linalg.norm(self._e_vec[:,0][3*i:3*(i+1)]) < self.POS_EPSILON) or \
                     (np.linalg.norm(self._e_vec[:,0][3*i:3*(i+1)] - self._prev_e_vec[3*i:3*(i+1)]) < self.POS_EPSILON)):
                     self._e_no_update_count += 1
-            if self._e_no_update_count >= int(len(tgt_pvs)):
+            if self._e_no_update_count >= int(len(tgt_pvs)/3):
                 break
             self._E_mat = 1/2*(self._e_vec.T @ self._W_E_mat @ self._e_vec)
             self._W_N_mat = self._E_mat*np.identity(len(self.DAMP_PARAM)) + self._W_N_bar_mat
