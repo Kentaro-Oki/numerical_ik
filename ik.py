@@ -90,7 +90,7 @@ class IK:
         self.theta = self.ik_pvrm_simple(init_theta, tgt_pvrm, self.fk.fk_arm_right_pvrm, self.jacob.jacob_pvrm_mat, is_jrange_mode)
         return self.theta
 
-    # IK for three fingers position
+    # IK for three finger positions
     def ik_fingers_simple(self, init_theta, tgt_pvs, is_jrange_mode=False):
         self.theta = self.ik_pvs_simple(init_theta, tgt_pvs, self.fk.fk_fingers_right_pvs, self.jacob.jacob_pvs_mat, is_jrange_mode)
         return self.theta
