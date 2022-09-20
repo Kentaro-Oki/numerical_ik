@@ -95,4 +95,4 @@ class FK:
         self.pv_thumb = self.tm2pv(self._tm_arm @ self.tm_arm_thumb_right(theta))
         self.pv_index = self.tm2pv(self._tm_arm @ self.tm_arm_index_right(theta))
         self.pv_middle = self.tm2pv(self._tm_arm @ self.tm_arm_middle_right(theta))
-        return self.pv_thumb, self.pv_index, self.pv_middle
+        return np.concatenate((self.pv_thumb, self.pv_index, self.pv_middle))
