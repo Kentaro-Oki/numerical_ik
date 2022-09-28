@@ -1,14 +1,14 @@
 import numpy as np
 from scipy.spatial.transform import Rotation as R
 from fk import FK
-from jacobian import Jacobian
+from numeric_jacobian import NumericalJacobian
 
 class IK:
     def __init__(self):
         self.POS_EPSILON = 1e-4
         self.ROT_EPSILON = 1e-6
-        self.DAMP_PARAM = np.concatenate((1.1e-3**np.ones(7), 0.1*1e-3*np.ones(4), \
-                                        0.1*1e-3*np.ones(3), 0.1*1e-3*np.ones(3))) # Damp for arm, thumb, index and middle joints
+        self.DAMP_PARAM = np.concatenate((1.1e-3**np.ones(7), 1.*1e-3*np.ones(4), \
+                                        1.*1e-3*np.ones(3), 1.*1e-3*np.ones(3))) # Damp for arm, thumb, index and middle joints
         self.JOINT_LIMIT_MIN = np.radians(np.array([-190., -90., -360., -15., -360., -60., -70., \
                                                     -90., -90., 0., -45., \
                                                     -25., 0., -20., \
@@ -19,7 +19,7 @@ class IK:
                                                     25., 100., 140.]))
 
         self.fk = FK()
-        self.jacob = Jacobian()
+        self.jacob = NumericalJacobian()
 
     # Calc. error of position vector and rotation matrix from theta of current pose and target position vector and rotation matrix
     def error_pvrm(self, theta, tgt_pvrm, fk_pvrm):

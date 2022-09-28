@@ -4,11 +4,12 @@ from ik import IK
 import time
 
 if __name__ == '__main__':
+    trial = 1
     fk = FK()
     ik = IK()
-    data = np.zeros((10,6))
+    data = np.zeros((trial,6))
 
-    for i in range(10):
+    for i in range(trial):
         print(i+1)
         init_theta = (ik.JOINT_LIMIT_MIN + ik.JOINT_LIMIT_MAX)/2
         # tgt_theta = init_theta + np.pi/3*np.ones(17)
@@ -18,8 +19,8 @@ if __name__ == '__main__':
         sub_tgt_pvs = np.array([0.2, -0.3, 1.0, 0.3, 0., 0.3])
 
         start_time = time.perf_counter()
-        ik_theta = ik.ik_fingers_simple(init_theta, tgt_pvs, True)
-        # ik_theta = ik.ik_fingers_prioritized(init_theta, tgt_pvs, sub_tgt_pvs, True)
+        # ik_theta = ik.ik_fingers_simple(init_theta, tgt_pvs, True)
+        ik_theta = ik.ik_fingers_prioritized(init_theta, tgt_pvs, sub_tgt_pvs, True)
         end_time = time.perf_counter()
         ik_pvs = fk.fk_fingers_right_pvs(ik_theta)
         sub_ik_pvs = fk.fk_elbow_wrist_right_pvs(ik_theta)
